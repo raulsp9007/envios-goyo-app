@@ -53,9 +53,10 @@ export default async function AdminDashboard() {
   // Aggregate top sellers by product name
   const sellerMap = new Map<string, number>()
   ;(topSellers ?? []).forEach(i => {
-    sellerMap.set(i.product_name, (sellerMap.get(i.product_name) ?? 0) + i.quantity)
+    const name = i.product_name ?? 'Desconocido'
+    sellerMap.set(name, (sellerMap.get(name) ?? 0) + (i.quantity ?? 0))
   })
-  const topList = [...sellerMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5)
+  const topList = Array.from(sellerMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5)
 
   return (
     <div>
