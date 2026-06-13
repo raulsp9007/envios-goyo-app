@@ -40,7 +40,7 @@ export async function updateProductAction(id: string, formData: FormData) {
 
   const supabase = createServiceClient()
   const { error } = await supabase.from('products').update(parsed.data).eq('id', id)
-  if (error) return
+  if (error) throw new Error(error.message)
 
   revalidatePath('/admin/productos')
 }
