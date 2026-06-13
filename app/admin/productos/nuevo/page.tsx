@@ -3,6 +3,14 @@ import { createProductAction } from '../actions'
 
 const CATEGORIES = ['Carnes', 'Granos', 'Despensa', 'Lácteos', 'Bebidas', 'Aseo', 'Viandas', 'Combos', 'Otros']
 
+interface FieldDef {
+  name: string
+  label: string
+  type: string
+  step?: string
+  required?: boolean
+}
+
 export default function NewProductPage({ searchParams }: { searchParams: { error?: string } }) {
   return (
     <div className="max-w-lg">
@@ -11,19 +19,19 @@ export default function NewProductPage({ searchParams }: { searchParams: { error
         <p className="text-red-400 text-sm mb-4">{searchParams.error}</p>
       )}
       <form action={createProductAction} className="space-y-4">
-        {[
+        {([
           { name: 'name', label: 'Nombre', type: 'text', required: true },
           { name: 'price_usd', label: 'Precio venta (USD)', type: 'number', step: '0.01', required: true },
           { name: 'cost_cup', label: 'Costo (CUP)', type: 'number', step: '0.01', required: true },
           { name: 'description', label: 'Descripción', type: 'text' },
           { name: 'image_url', label: 'URL de imagen', type: 'url' },
-        ].map(f => (
+        ] as FieldDef[]).map(f => (
           <div key={f.name}>
             <label className="block text-sm text-slate-300 mb-1">{f.label}</label>
             <input
               name={f.name}
               type={f.type}
-              step={(f as any).step}
+              step={f.step}
               required={f.required}
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
             />

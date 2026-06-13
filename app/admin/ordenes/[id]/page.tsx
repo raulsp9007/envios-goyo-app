@@ -1,6 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { ORDER_STATUS_LABELS, ORDER_STATUS_FLOW, type OrderStatus, type OrderWithItems } from '@/types'
+import { ORDER_STATUS_LABELS, ORDER_STATUS_FLOW, type OrderWithItems } from '@/types'
 import ProfitTable from '@/components/admin/ProfitTable'
 import { advanceOrderStatusAction } from '../actions'
 import StatusProgress from '@/components/store/StatusProgress'
