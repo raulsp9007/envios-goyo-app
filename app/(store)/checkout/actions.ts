@@ -9,7 +9,8 @@ const CheckoutSchema = z.object({
   customer_name: z.string().min(2),
   customer_email: z.string().email(),
   customer_phone: z.string().min(6),
-  customer_address: z.string().min(5),
+  customer_address: z.string().min(3),
+  customer_municipio: z.string().min(2),
   customer_note: z.string().optional(),
   cart: z.string(),
 })
@@ -20,6 +21,7 @@ export async function createOrderAction(formData: FormData) {
     customer_email: formData.get('customer_email'),
     customer_phone: formData.get('customer_phone'),
     customer_address: formData.get('customer_address'),
+    customer_municipio: formData.get('customer_municipio'),
     customer_note: formData.get('customer_note') ?? '',
     cart: formData.get('cart'),
   })
@@ -28,7 +30,8 @@ export async function createOrderAction(formData: FormData) {
     redirect('/checkout?error=Formulario+invalido')
   }
 
-  const { customer_name, customer_email, customer_phone, customer_address, customer_note, cart } = parsed.data
+  const { customer_name, customer_email, customer_phone, customer_note, cart } = parsed.data
+  const customer_address = `${parsed.data.customer_address}, ${parsed.data.customer_municipio}`
   const cartItems: { product_id: string; name: string; price_usd: number; quantity: number }[] = JSON.parse(cart)
 
   if (cartItems.length === 0) {

@@ -11,6 +11,9 @@ interface CartContextValue {
   clearCart: () => void
   total: number
   count: number
+  isOpen: boolean
+  openCart: () => void
+  closeCart: () => void
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
@@ -19,6 +22,7 @@ const STORAGE_KEY = 'goyo-cart'
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
+  const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
     try {
@@ -43,6 +47,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, { ...product, quantity: 1 }]
     })
+    setIsOpen(true)
   }
 
   function removeItem(product_id: string) {
@@ -50,24 +55,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   function updateQuantity(product_id: string, quantity: number) {
-    if (quantity <= 0) {
-      removeItem(product_id)
-      return
-    }
+    if (quantity <= 0) { removeItem(product_id); return }
     setItems(prev =>
       prev.map(i => i.product_id === product_id ? { ...i, quantity } : i)
     )
   }
 
-  function clearCart() {
-    setItems([])
-  }
+  function clearCart() { setItems([]) }
+  const openCart = () => setIsOpen(true)
+  const closeCart = () => setIsOpen(false)
 
   const total = items.reduce((s, i) => s + i.price_usd * i.quantity, 0)
   const count = items.reduce((s, i) => s + i.quantity, 0)
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, total, count }}>
+    <CartContext.Provider value={{
+      items, addItem, removeItem, updateQuantity, clearCart,
+      total, count, isOpen, openCart, closeCart,
+    }}>
       {children}
     </CartContext.Provider>
   )
