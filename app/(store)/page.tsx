@@ -3,32 +3,27 @@ import ProductCard from '@/components/store/ProductCard'
 import { Logo } from '@/components/Logo'
 import type { Product } from '@/types'
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  Granos: '🌾',
-  Carnes: '🥩',
-  Despensa: '🫙',
-  Lácteos: '🥛',
-  Higiene: '🧴',
-  Bebidas: '🥤',
-  Limpieza: '🧹',
-  Dulces: '🍬',
-  Frutas: '🍎',
-  Verduras: '🥦',
-}
-
 export default async function HomePage() {
   const supabase = createServiceClient()
-  const { data } = await supabase
-    .from('products')
-    .select('id, name, category, price_usd, description, image_url, active, created_at')
-    .eq('active', true)
-    .order('category')
-    .order('name')
 
-  const products = (data ?? []) as Product[]
-  const categories = Array.from(
-    new Set(products.map(p => p.category).filter(Boolean))
-  ).sort()
+  const [{ data: productsData }, { data: categoriesData }] = await Promise.all([
+    supabase
+      .from('products')
+      .select('id, name, category, price_usd, description, image_url, active, created_at')
+      .eq('active', true)
+      .order('category')
+      .order('name'),
+    supabase
+      .from('categories')
+      .select('name, emoji')
+      .order('position'),
+  ])
+
+  const products = (productsData ?? []) as Product[]
+
+  // Build category display list (only categories that have active products)
+  const productCategorySet = new Set(products.map(p => p.category))
+  const categoryList = (categoriesData ?? []).filter(c => productCategorySet.has(c.name))
 
   return (
     <div>
@@ -47,20 +42,20 @@ export default async function HomePage() {
       </section>
 
       {/* Categories */}
-      {categories.length > 0 && (
+      {categoryList.length > 0 && (
         <section className="px-4 mb-10 max-w-6xl mx-auto">
           <h2 className="text-lg font-bold text-white mb-3">Categorías</h2>
           <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
-            {categories.map(cat => {
-              const count = products.filter(p => p.category === cat).length
+            {categoryList.map(cat => {
+              const count = products.filter(p => p.category === cat.name).length
               return (
                 <a
-                  key={cat}
-                  href={`/productos?categoria=${encodeURIComponent(cat)}`}
+                  key={cat.name}
+                  href={`/productos?categoria=${encodeURIComponent(cat.name)}`}
                   className="flex-shrink-0 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl p-4 min-w-[110px] text-center transition"
                 >
-                  <div className="text-2xl mb-1">{CATEGORY_EMOJI[cat] ?? '📦'}</div>
-                  <div className="text-white text-sm font-semibold">{cat}</div>
+                  <div className="text-2xl mb-1">{cat.emoji}</div>
+                  <div className="text-white text-sm font-semibold">{cat.name}</div>
                   <div className="text-slate-400 text-xs mt-0.5">
                     {count} {count === 1 ? 'producto' : 'productos'}
                   </div>

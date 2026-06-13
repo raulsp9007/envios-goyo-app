@@ -1,10 +1,6 @@
 import Link from 'next/link'
 import { createProductAction } from '../actions'
-
-const CATEGORIES = [
-  'Cárnicos', 'Embutidos', 'Granos', 'Agro', 'Bebidas',
-  'Lácteos', 'Hogar', 'Pastas', 'Confituras', 'Café', 'Otros',
-]
+import { createServiceClient } from '@/lib/supabase/server'
 
 export default async function NewProductPage({
   searchParams,
@@ -12,6 +8,12 @@ export default async function NewProductPage({
   searchParams: Promise<{ error?: string }>
 }) {
   const params = await searchParams
+  const supabase = createServiceClient()
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('name, emoji')
+    .order('position')
+
   return (
     <div className="max-w-lg">
       <h1 className="text-2xl font-bold mb-6">Nuevo producto</h1>
@@ -24,33 +26,45 @@ export default async function NewProductPage({
           <input name="name" type="text" required
             className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500" />
         </div>
+
         <div>
-          <label className="block text-sm text-slate-300 mb-1">Categoría *</label>
+          <label className="block text-sm text-slate-300 mb-1">
+            Categoría *{' '}
+            <Link href="/admin/categorias" className="text-xs text-orange-400 hover:underline ml-1">
+              Gestionar categorías →
+            </Link>
+          </label>
           <select name="category" required
             className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500">
             <option value="">Selecciona...</option>
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            {(categories ?? []).map(c => (
+              <option key={c.name} value={c.name}>
+                {c.emoji} {c.name}
+              </option>
+            ))}
           </select>
         </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-sm text-slate-300 mb-1">Precio venta (USD) *</label>
-            <input name="price_usd" type="number" step="0.01" required
+            <input name="price_usd" type="number" step="0.01" min="0" required
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500" />
           </div>
           <div>
             <label className="block text-sm text-slate-300 mb-1">Costo (CUP) *</label>
-            <input name="cost_cup" type="number" step="0.01" required
+            <input name="cost_cup" type="number" step="0.01" min="0" required
               className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500" />
           </div>
         </div>
+
         <div>
           <label className="block text-sm text-slate-300 mb-1">Descripción</label>
           <input name="description" type="text"
             className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500" />
         </div>
 
-        {/* Image: file OR URL */}
+        {/* Image */}
         <div className="border border-slate-700 rounded-xl p-4 space-y-3">
           <p className="text-sm text-slate-300 font-medium">Imagen del producto</p>
           <div>
