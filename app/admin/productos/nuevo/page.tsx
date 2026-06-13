@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createProductAction } from '../actions'
 
 const CATEGORIES = ['Carnes', 'Granos', 'Despensa', 'Lácteos', 'Bebidas', 'Aseo', 'Viandas', 'Combos', 'Otros']
@@ -46,9 +47,9 @@ export default function NewProductPage({ searchParams }: { searchParams: { error
           >
             Guardar
           </button>
-          <a href="/admin/productos" className="text-slate-400 hover:text-white px-4 py-2">
+          <Link href="/admin/productos" className="text-slate-400 hover:text-white px-4 py-2">
             Cancelar
-          </a>
+          </Link>
         </div>
       </form>
     </div>
