@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_FLOW, type OrderWithItems } from '@/types'
 import ProfitTable from '@/components/admin/ProfitTable'
 import { advanceOrderStatusAction, recalculateOrderAction } from '../actions'
+import { calculateOrderProfit } from '@/lib/profit'
 
 export const dynamic = 'force-dynamic'
 import StatusProgress from '@/components/store/StatusProgress'
@@ -23,6 +24,18 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
   const order = data as unknown as OrderWithItems
   const currentIndex = ORDER_STATUS_FLOW.indexOf(order.status)
   const isCompleted = currentIndex === ORDER_STATUS_FLOW.length - 1
+
+  const rate = order.exchange_rate_snapshot
+  const profitSummary = calculateOrderProfit(
+    order.order_items.map(i => ({
+      product_name: i.product_name,
+      quantity: i.quantity,
+      price_usd: i.price_usd,
+      cost_cup: i.cost_cup,
+      exchange_rate: rate,
+    }))
+  )
+  const investmentUsd = rate > 0 ? profitSummary.total_investment_cup / rate : 0
 
   return (
     <div className="max-w-5xl">
@@ -79,6 +92,8 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
           <div className="space-y-1 text-sm">
             <p><span className="text-slate-400">Total cobrado:</span> <span className="text-orange-400 font-bold">${order.total_usd.toFixed(2)} USD</span></p>
             <p><span className="text-slate-400">Tasa usada:</span> <span className="text-white">{order.exchange_rate_snapshot} CUP/USD</span></p>
+            <p><span className="text-slate-400">Inversión:</span> <span className="text-white">${investmentUsd.toFixed(2)} USD</span> <span className="text-slate-500 text-xs">({profitSummary.total_investment_cup.toFixed(0)} CUP)</span></p>
+            <p><span className="text-slate-400">Ganancia neta:</span> <span className={profitSummary.profit_usd >= 0 ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>${profitSummary.profit_usd.toFixed(2)} USD</span></p>
           </div>
         </div>
       </div>
