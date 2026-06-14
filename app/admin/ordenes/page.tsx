@@ -29,27 +29,12 @@ export default async function AdminOrdersPage({
     query = query.eq('status', searchParams.status)
   }
 
-  const { data: orders, error: ordersError } = await query
-
-  if (ordersError) {
-    console.error('[admin/ordenes] Supabase error:', ordersError)
-  } else {
-    console.log('[admin/ordenes] Query returned', orders?.length ?? 0, 'orders')
-    orders?.forEach(o => console.log('  order:', o.id, 'order_number:', o.order_number, 'status:', o.status))
-  }
+  const { data: orders } = await query
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Órdenes</h1>
 
-      {process.env.NODE_ENV !== 'production' ? null : (
-        <div className="text-xs text-slate-500 mb-2 space-y-0.5">
-          <p>DB devolvió {orders?.length ?? 0} órdenes · {process.env.NEXT_PUBLIC_SUPABASE_URL?.slice(8, 28)}</p>
-          {orders?.map(o => (
-            <p key={o.id}>#{o.order_number} id={o.id.slice(0,8)} status={o.status} total={String(o.total_usd)}</p>
-          ))}
-        </div>
-      )}
 
       <div className="flex gap-2 flex-wrap mb-6">
         {STATUS_FILTERS.map(f => (
