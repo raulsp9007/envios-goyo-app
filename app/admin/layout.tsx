@@ -10,6 +10,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin/ordenes" className="text-sm text-slate-300 hover:text-white">Órdenes</Link>
         <Link href="/admin/productos" className="text-sm text-slate-300 hover:text-white">Productos</Link>
         <Link href="/admin/categorias" className="text-sm text-slate-300 hover:text-white">Categorías</Link>
+        <Link href="/admin/transporte" className="text-sm text-slate-300 hover:text-white">Transporte</Link>
         <Link href="/admin/tasa" className="text-sm text-slate-300 hover:text-white">Tasa</Link>
         <Link href="/admin/importar" className="text-sm text-slate-300 hover:text-white">Importar</Link>
         <Link href="/admin/configuracion" className="text-sm text-slate-300 hover:text-white">Config</Link>
