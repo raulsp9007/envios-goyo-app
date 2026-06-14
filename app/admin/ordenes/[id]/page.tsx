@@ -25,7 +25,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
   const isCompleted = currentIndex === ORDER_STATUS_FLOW.length - 1
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Orden #{order.order_number}</h1>
@@ -83,55 +83,57 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
         </div>
       </div>
 
-      <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-        <h2 className="font-bold text-white mb-4">Detalle de ganancia</h2>
-        <ProfitTable items={order.order_items} exchangeRate={order.exchange_rate_snapshot} />
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <h2 className="font-bold text-white mb-4">Detalle de ganancia</h2>
+          <ProfitTable items={order.order_items} exchangeRate={order.exchange_rate_snapshot} />
+        </div>
 
-      <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 mt-4">
-        <h2 className="font-bold text-white mb-4">Recalcular costos</h2>
-        <form action={recalculateOrderAction.bind(null, order.id)} className="space-y-4">
-          <div>
-            <label className="block text-sm text-slate-300 mb-1">Tasa de cambio (CUP/USD)</label>
-            <input
-              name="exchange_rate"
-              type="number"
-              step="0.01"
-              min="0"
-              defaultValue={order.exchange_rate_snapshot}
-              className="w-40 bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
-            />
-          </div>
-          <div className="space-y-2">
-            <p className="text-sm text-slate-400 font-medium">Costo CUP por ítem</p>
-            {order.order_items.map(item => (
-              <div key={item.id} className="flex items-center gap-3">
-                <span className="text-sm text-slate-300 flex-1">
-                  {item.product_name} × {item.quantity}
-                </span>
-                <input type="hidden" name={`product_id_${item.id}`} value={item.product_id ?? ''} />
-                <input
-                  name={`cost_cup_${item.id}`}
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  defaultValue={item.cost_cup}
-                  className="w-32 bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 text-sm"
-                />
-                <span className="text-xs text-slate-500">CUP</span>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-slate-500">
-            ⚠️ Guardar actualizará el costo real de cada producto en el catálogo.
-          </p>
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-lg text-sm transition"
-          >
-            Guardar y recalcular
-          </button>
-        </form>
+        <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <h2 className="font-bold text-white mb-4">Recalcular costos</h2>
+          <form action={recalculateOrderAction.bind(null, order.id)} className="space-y-4">
+            <div>
+              <label className="block text-sm text-slate-300 mb-1">Tasa de cambio (CUP/USD)</label>
+              <input
+                name="exchange_rate"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={order.exchange_rate_snapshot}
+                className="w-40 bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-slate-400 font-medium">Costo CUP por ítem</p>
+              {order.order_items.map(item => (
+                <div key={item.id} className="flex items-center gap-3">
+                  <span className="text-sm text-slate-300 flex-1 min-w-0 truncate">
+                    {item.product_name} × {item.quantity}
+                  </span>
+                  <input type="hidden" name={`product_id_${item.id}`} value={item.product_id ?? ''} />
+                  <input
+                    name={`cost_cup_${item.id}`}
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    defaultValue={item.cost_cup}
+                    className="w-28 bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 text-sm"
+                  />
+                  <span className="text-xs text-slate-500 shrink-0">CUP</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-slate-500">
+              ⚠️ Guardar actualizará el costo real de cada producto en el catálogo.
+            </p>
+            <button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-lg text-sm transition"
+            >
+              Guardar y recalcular
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )
