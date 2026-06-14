@@ -29,7 +29,14 @@ export default async function AdminOrdersPage({
     query = query.eq('status', searchParams.status)
   }
 
-  const { data: orders } = await query
+  const { data: orders, error: ordersError } = await query
+
+  if (ordersError) {
+    console.error('[admin/ordenes] Supabase error:', ordersError)
+  } else {
+    console.log('[admin/ordenes] Query returned', orders?.length ?? 0, 'orders')
+    orders?.forEach(o => console.log('  order:', o.id, 'order_number:', o.order_number, 'status:', o.status))
+  }
 
   return (
     <div>
