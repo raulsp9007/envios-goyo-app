@@ -26,13 +26,13 @@ export interface Product {
   name: string
   category: string
   price_usd: number
+  price_usd_sale: number | null
   description: string
   image_url: string
   active: boolean
   created_at: string
 }
 
-// Admin-only — includes cost
 export interface ProductWithCost extends Product {
   cost_cup: number
 }
@@ -51,9 +51,13 @@ export interface Order {
   customer_email: string
   customer_phone: string
   customer_address: string
+  customer_municipio: string
+  customer_provincia: string
   customer_note: string
   status: OrderStatus
   total_usd: number
+  shipping_method: 'pickup' | 'delivery'
+  shipping_cost_usd: number
   exchange_rate_snapshot: number
   payment_instructions: string
   created_at: string
@@ -71,4 +75,27 @@ export interface OrderItem {
 
 export interface OrderWithItems extends Order {
   order_items: OrderItem[]
+}
+
+export interface Province {
+  id: number
+  name: string
+  base_price_usd: number
+  position: number
+  municipalities?: Municipality[]
+}
+
+export interface Municipality {
+  id: number
+  province_id: number
+  name: string
+  surcharge_usd: number
+}
+
+export interface ShippingConfig {
+  id: 1
+  fuel_cost_usd: number
+  pickup_enabled: boolean
+  delivery_enabled: boolean
+  pickup_address: string
 }
