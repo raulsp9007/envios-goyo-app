@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { createProductAction } from '../actions'
 import { createServiceClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 export default async function NewProductPage({
   searchParams,
 }: {

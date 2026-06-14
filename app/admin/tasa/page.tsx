@@ -1,6 +1,8 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { updateRateAction } from './actions'
 
+export const dynamic = 'force-dynamic'
+
 export default async function TasaPage() {
   const supabase = createServiceClient()
   const { data } = await supabase.from('exchange_rate').select('*').eq('id', 1).single()

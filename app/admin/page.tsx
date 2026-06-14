@@ -4,6 +4,8 @@ import Link from 'next/link'
 import type { OrderStatus, OrderItem } from '@/types'
 import { ORDER_STATUS_LABELS } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminDashboard() {
   const supabase = createServiceClient()
 

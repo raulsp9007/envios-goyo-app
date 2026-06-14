@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_FLOW, type OrderWithItems } from '@/types'
 import ProfitTable from '@/components/admin/ProfitTable'
 import { advanceOrderStatusAction } from '../actions'
+
+export const dynamic = 'force-dynamic'
 import StatusProgress from '@/components/store/StatusProgress'
 
 export default async function AdminOrderDetailPage({ params }: { params: { id: string } }) {

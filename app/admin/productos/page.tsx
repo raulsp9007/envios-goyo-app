@@ -3,6 +3,8 @@ import { toggleProductAction } from './actions'
 import Link from 'next/link'
 import type { ProductWithCost } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminProductsPage() {
   const supabase = createServiceClient()
   const { data } = await supabase

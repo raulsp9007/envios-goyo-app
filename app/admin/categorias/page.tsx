@@ -2,6 +2,8 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { createCategoryAction, updateCategoryAction, deleteCategoryAction } from './actions'
 import CategoryRow from './CategoryRow'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CategoriasPage() {
   const supabase = createServiceClient()
 

@@ -3,6 +3,8 @@ import ProductCard from '@/components/store/ProductCard'
 import { Logo } from '@/components/Logo'
 import type { Product } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export default async function HomePage() {
   const supabase = createServiceClient()
 

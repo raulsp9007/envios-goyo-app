@@ -2,6 +2,8 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { ORDER_STATUS_LABELS, type OrderStatus } from '@/types'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 const STATUS_FILTERS: { label: string; value: string }[] = [
   { label: 'Todas', value: '' },
   { label: '⏳ Pendiente', value: 'pending_payment' },
