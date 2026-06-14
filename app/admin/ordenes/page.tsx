@@ -42,6 +42,12 @@ export default async function AdminOrdersPage({
     <div>
       <h1 className="text-2xl font-bold mb-6">Órdenes</h1>
 
+      {process.env.NODE_ENV !== 'production' ? null : (
+        <p className="text-xs text-slate-500 mb-2">
+          DB devolvió {orders?.length ?? 0} órdenes {ordersError ? `— ERROR: ${ordersError.message}` : ''}
+        </p>
+      )}
+
       <div className="flex gap-2 flex-wrap mb-6">
         {STATUS_FILTERS.map(f => (
           <Link
