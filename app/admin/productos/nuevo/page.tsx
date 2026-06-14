@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import { createProductAction } from '../actions'
 import { createServiceClient } from '@/lib/supabase/server'
-import { SalePriceField } from '../SalePriceField'
-import { ProfitPreview } from '../ProfitPreview'
+import { ProductPricingSection } from '../ProductPricingSection'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,12 +49,12 @@ export default async function NewProductPage({
           </select>
         </div>
 
-        <ProfitPreview initialPriceUsd={0} initialCostCup={0} rate={rate} />
-
-        <div>
-          <label className="block text-sm text-slate-300 mb-1">Precio rebajado</label>
-          <SalePriceField priceUsd={0} currentSalePrice={null} />
-        </div>
+        <ProductPricingSection
+          initialPriceUsd={0}
+          initialCostCup={0}
+          currentSalePrice={null}
+          rate={rate}
+        />
 
         <div>
           <label className="block text-sm text-slate-300 mb-1">Descripción</label>

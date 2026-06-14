@@ -2,8 +2,7 @@ import Link from 'next/link'
 import { createServiceClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { updateProductAction } from '../../actions'
-import { SalePriceField } from '../../SalePriceField'
-import { ProfitPreview } from '../../ProfitPreview'
+import { ProductPricingSection } from '../../ProductPricingSection'
 import type { ProductWithCost } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -58,11 +57,12 @@ export default async function EditProductPage({
             ))}
           </select>
         </div>
-        <ProfitPreview initialPriceUsd={p.price_usd} initialCostCup={p.cost_cup} rate={rate} />
-        <div>
-          <label className="block text-sm text-slate-300 mb-1">Precio rebajado</label>
-          <SalePriceField priceUsd={p.price_usd} currentSalePrice={p.price_usd_sale} />
-        </div>
+        <ProductPricingSection
+          initialPriceUsd={p.price_usd}
+          initialCostCup={p.cost_cup}
+          currentSalePrice={p.price_usd_sale}
+          rate={rate}
+        />
         <div>
           <label className="block text-sm text-slate-300 mb-1">Descripción</label>
           <input name="description" type="text" defaultValue={p.description ?? ''}
