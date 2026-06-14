@@ -32,24 +32,29 @@ async function uploadImageFile(file: File): Promise<string | null> {
   }
 }
 
+function parseSalePrice(formData: FormData): number | null {
+  const raw = formData.get('price_usd_sale')
+  return raw && raw !== '' ? Number(raw) : null
+}
+
 export async function createProductAction(formData: FormData) {
   const auth = createAuthClient()
   const { data: { user } } = await auth.auth.getUser()
   if (!user) redirect('/admin/login')
 
-  // Image: prefer file upload over URL
   const file = formData.get('image_file') as File
   const uploadedUrl = await uploadImageFile(file)
-  const image_url = uploadedUrl ?? (formData.get('image_url') as string ?? '')
+  const image_url = uploadedUrl ?? ((formData.get('image_url') as string) ?? '')
 
-  const parsed = ProductSchema.safeParse({
-    ...Object.fromEntries(formData),
-    image_url,
-  })
+  const parsed = ProductSchema.safeParse({ ...Object.fromEntries(formData), image_url })
   if (!parsed.success) redirect('/admin/productos/nuevo?error=Datos+invalidos')
 
   const supabase = createServiceClient()
-  const { error } = await supabase.from('products').insert({ ...parsed.data, active: true })
+  const { error } = await supabase.from('products').insert({
+    ...parsed.data,
+    price_usd_sale: parseSalePrice(formData),
+    active: true,
+  })
   if (error) redirect('/admin/productos/nuevo?error=Error+al+guardar')
 
   revalidatePath('/admin/productos')
@@ -66,13 +71,16 @@ export async function updateProductAction(id: string, formData: FormData) {
   if (uploadedUrl) formData.set('image_url', uploadedUrl)
 
   const parsed = ProductSchema.partial().safeParse(Object.fromEntries(formData))
-  if (!parsed.success) return
+  if (!parsed.success) redirect(`/admin/productos/${id}/editar?error=Datos+invalidos`)
 
   const supabase = createServiceClient()
-  const { error } = await supabase.from('products').update(parsed.data).eq('id', id)
-  if (error) throw new Error(error.message)
+  await supabase.from('products').update({
+    ...parsed.data,
+    price_usd_sale: parseSalePrice(formData),
+  }).eq('id', id)
 
   revalidatePath('/admin/productos')
+  redirect('/admin/productos')
 }
 
 export async function toggleProductAction(id: string, active: boolean) {

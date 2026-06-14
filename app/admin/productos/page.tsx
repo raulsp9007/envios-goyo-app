@@ -41,9 +41,11 @@ export default async function AdminProductsPage() {
               <th className="text-left p-3">Producto</th>
               <th className="text-left p-3">Categoría</th>
               <th className="text-right p-3">Precio USD</th>
+              <th className="text-right p-3">P. rebajado</th>
               <th className="text-right p-3">Costo CUP</th>
               <th className="text-right p-3">Ganancia est. %</th>
               <th className="text-center p-3">Activo</th>
+              <th className="p-3"></th>
             </tr>
           </thead>
           <tbody>
@@ -57,6 +59,13 @@ export default async function AdminProductsPage() {
                   <td className="p-3 text-white">{p.name}</td>
                   <td className="p-3 text-slate-400">{p.category}</td>
                   <td className="p-3 text-right text-orange-400">${p.price_usd.toFixed(2)}</td>
+                  <td className="p-3 text-right">
+                    {p.price_usd_sale != null ? (
+                      <span className="text-green-400">${p.price_usd_sale.toFixed(2)}</span>
+                    ) : (
+                      <span className="text-slate-600">—</span>
+                    )}
+                  </td>
                   <td className="p-3 text-right text-slate-300">{p.cost_cup.toFixed(0)} CUP</td>
                   <td className="p-3 text-right">
                     <span className={profitPct > 0 ? 'text-green-400' : 'text-red-400'}>
@@ -76,6 +85,11 @@ export default async function AdminProductsPage() {
                         {p.active ? 'Activo' : 'Inactivo'}
                       </button>
                     </form>
+                  </td>
+                  <td className="p-3">
+                    <Link href={`/admin/productos/${p.id}/editar`} className="text-xs text-orange-400 hover:underline">
+                      Editar
+                    </Link>
                   </td>
                 </tr>
               )
