@@ -80,6 +80,7 @@ export async function updateProductAction(id: string, formData: FormData) {
   }).eq('id', id)
 
   revalidatePath('/admin/productos')
+  revalidatePath(`/admin/productos/${id}/editar`)
   redirect('/admin/productos')
 }
 
