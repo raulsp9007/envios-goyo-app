@@ -2,7 +2,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_FLOW, type OrderWithItems } from '@/types'
 import ProfitTable from '@/components/admin/ProfitTable'
-import { advanceOrderStatusAction } from '../actions'
+import { advanceOrderStatusAction, recalculateOrderAction } from '../actions'
 
 export const dynamic = 'force-dynamic'
 import StatusProgress from '@/components/store/StatusProgress'
@@ -57,6 +57,18 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
             <p><span className="text-slate-400">Email:</span> <span className="text-white">{order.customer_email}</span></p>
             <p><span className="text-slate-400">Teléfono:</span> <span className="text-white">{order.customer_phone}</span></p>
             <p><span className="text-slate-400">Dirección:</span> <span className="text-white">{order.customer_address}</span></p>
+            {order.customer_municipio && (
+              <p>
+                <span className="text-slate-400">Municipio:</span>{' '}
+                <span className="text-white">{order.customer_municipio}{order.customer_provincia ? `, ${order.customer_provincia}` : ''}</span>
+              </p>
+            )}
+            {order.shipping_method === 'pickup' && (
+              <p><span className="text-slate-400">Método:</span> <span className="text-white">Recogida en local</span></p>
+            )}
+            {order.shipping_cost_usd > 0 && (
+              <p><span className="text-slate-400">Costo envío:</span> <span className="text-white">${order.shipping_cost_usd.toFixed(2)} USD</span></p>
+            )}
             {order.customer_note && (
               <p><span className="text-slate-400">Nota:</span> <span className="text-white">{order.customer_note}</span></p>
             )}
@@ -74,6 +86,52 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
       <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
         <h2 className="font-bold text-white mb-4">Detalle de ganancia</h2>
         <ProfitTable items={order.order_items} exchangeRate={order.exchange_rate_snapshot} />
+      </div>
+
+      <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 mt-4">
+        <h2 className="font-bold text-white mb-4">Recalcular costos</h2>
+        <form action={recalculateOrderAction.bind(null, order.id)} className="space-y-4">
+          <div>
+            <label className="block text-sm text-slate-300 mb-1">Tasa de cambio (CUP/USD)</label>
+            <input
+              name="exchange_rate"
+              type="number"
+              step="0.01"
+              min="0"
+              defaultValue={order.exchange_rate_snapshot}
+              className="w-40 bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
+            />
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm text-slate-400 font-medium">Costo CUP por ítem</p>
+            {order.order_items.map(item => (
+              <div key={item.id} className="flex items-center gap-3">
+                <span className="text-sm text-slate-300 flex-1">
+                  {item.product_name} × {item.quantity}
+                </span>
+                <input type="hidden" name={`product_id_${item.id}`} value={item.product_id ?? ''} />
+                <input
+                  name={`cost_cup_${item.id}`}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  defaultValue={item.cost_cup}
+                  className="w-32 bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500 text-sm"
+                />
+                <span className="text-xs text-slate-500">CUP</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-slate-500">
+            ⚠️ Guardar actualizará el costo real de cada producto en el catálogo.
+          </p>
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2 rounded-lg text-sm transition"
+          >
+            Guardar y recalcular
+          </button>
+        </form>
       </div>
     </div>
   )

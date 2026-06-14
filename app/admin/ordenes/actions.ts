@@ -36,3 +36,34 @@ export async function advanceOrderStatusAction(orderId: string, currentStatus: O
   revalidatePath(`/admin/ordenes/${orderId}`)
   revalidatePath('/admin/ordenes')
 }
+
+export async function recalculateOrderAction(orderId: string, formData: FormData) {
+  const auth = createAuthClient()
+  const { data: { user } } = await auth.auth.getUser()
+  if (!user) redirect('/admin/login')
+
+  const supabase = createServiceClient()
+  const exchange_rate = Number(formData.get('exchange_rate'))
+
+  await supabase.from('orders')
+    .update({ exchange_rate_snapshot: exchange_rate })
+    .eq('id', orderId)
+
+  const entries = Array.from(formData.entries())
+  const itemEntries = entries.filter(([key]) => key.startsWith('cost_cup_'))
+
+  for (const [key, val] of itemEntries) {
+    const itemId = key.replace('cost_cup_', '')
+    const cost_cup = Number(val)
+    const productIdRaw = formData.get(`product_id_${itemId}`)
+    const product_id = productIdRaw && productIdRaw !== '' ? String(productIdRaw) : null
+
+    await supabase.from('order_items').update({ cost_cup }).eq('id', itemId)
+
+    if (product_id) {
+      await supabase.from('products').update({ cost_cup }).eq('id', product_id)
+    }
+  }
+
+  revalidatePath(`/admin/ordenes/${orderId}`)
+}
