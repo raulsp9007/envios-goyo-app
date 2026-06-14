@@ -7,10 +7,11 @@ import ProductCard from './ProductCard'
 interface Props {
   products: Product[]
   initialCategory?: string
+  initialSearch?: string
 }
 
-export default function ProductsGrid({ products, initialCategory = '' }: Props) {
-  const [search, setSearch] = useState('')
+export default function ProductsGrid({ products, initialCategory = '', initialSearch = '' }: Props) {
+  const [search, setSearch] = useState(initialSearch)
   const [category, setCategory] = useState(initialCategory)
 
   const categories = useMemo(

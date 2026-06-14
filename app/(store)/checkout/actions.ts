@@ -40,40 +40,47 @@ export async function createOrderAction(formData: FormData) {
 
   const supabase = createServiceClient()
 
-  const { data: rateRow } = await supabase.from('exchange_rate').select('rate').eq('id', 1).single()
-  const exchange_rate = rateRow?.rate ?? 600
-
   const productIds = cartItems.map(i => i.product_id)
-  const { data: products } = await supabase.from('products').select('id, price_usd, cost_cup').in('id', productIds)
-  const productMap = new Map((products ?? []).map(p => [p.id, p]))
 
+  // Parallel fetch: all pre-order data at once
+  const [
+    { data: rateRow },
+    { data: products },
+    { data: settingRow },
+    munResult,
+  ] = await Promise.all([
+    supabase.from('exchange_rate').select('rate').eq('id', 1).single(),
+    supabase.from('products').select('id, price_usd, cost_cup').in('id', productIds),
+    supabase.from('settings').select('value').eq('key', 'payment_instructions').single(),
+    shipping_method === 'delivery' && municipality_id
+      ? supabase
+          .from('municipalities')
+          .select('name, surcharge_usd, provinces(name, base_price_usd)')
+          .eq('id', municipality_id)
+          .single()
+      : Promise.resolve({ data: null }),
+  ])
+
+  const exchange_rate = rateRow?.rate ?? 600
+  const productMap = new Map((products ?? []).map(p => [p.id, p]))
+  const payment_instructions = settingRow?.value ?? ''
   const products_total = cartItems.reduce((s, i) => s + i.price_usd * i.quantity, 0)
 
   let shipping_cost_usd = 0
   let customer_municipio = ''
   let customer_provincia = ''
 
-  if (shipping_method === 'delivery' && municipality_id) {
-    const { data: mun } = await supabase
-      .from('municipalities')
-      .select('name, surcharge_usd, provinces(name, base_price_usd)')
-      .eq('id', municipality_id)
-      .single()
-
-    if (mun) {
-      const { data: config } = await supabase.from('shipping_config').select('fuel_cost_usd').eq('id', 1).single()
-      const fuel = config?.fuel_cost_usd ?? 0
-      const prov = mun.provinces as unknown as { name: string; base_price_usd: number }
-      shipping_cost_usd = mun.surcharge_usd + prov.base_price_usd + fuel
-      customer_municipio = mun.name
-      customer_provincia = prov.name
-    }
+  const mun = munResult.data
+  if (mun) {
+    const { data: config } = await supabase.from('shipping_config').select('fuel_cost_usd').eq('id', 1).single()
+    const fuel = config?.fuel_cost_usd ?? 0
+    const prov = mun.provinces as unknown as { name: string; base_price_usd: number }
+    shipping_cost_usd = mun.surcharge_usd + prov.base_price_usd + fuel
+    customer_municipio = mun.name
+    customer_provincia = prov.name
   }
 
   const total_usd = Math.round((products_total + shipping_cost_usd) * 100) / 100
-
-  const { data: settingRow } = await supabase.from('settings').select('value').eq('key', 'payment_instructions').single()
-  const payment_instructions = settingRow?.value ?? ''
 
   const { data: order, error } = await supabase
     .from('orders')
@@ -94,7 +101,10 @@ export async function createOrderAction(formData: FormData) {
     .select()
     .single()
 
-  if (error || !order) redirect('/checkout?error=Error+creando+la+orden')
+  if (error || !order) {
+    console.error('[checkout] Error creando orden:', error)
+    redirect('/checkout?error=Error+creando+la+orden')
+  }
 
   const orderItems = cartItems.map(item => {
     const product = productMap.get(item.product_id)
@@ -110,14 +120,11 @@ export async function createOrderAction(formData: FormData) {
 
   await supabase.from('order_items').insert(orderItems)
 
-  try {
-    await Promise.all([
-      sendNewOrderEmail(order, orderItems),
-      sendWhatsAppNotification(order),
-    ])
-  } catch (e) {
-    console.error('Notification error:', e)
-  }
+  // Fire-and-forget — don't block redirect on notifications
+  Promise.all([
+    sendNewOrderEmail(order, orderItems),
+    sendWhatsAppNotification(order),
+  ]).catch(e => console.error('[checkout] Notification error:', e))
 
   redirect(`/orden/${order.id}?nueva=1`)
 }

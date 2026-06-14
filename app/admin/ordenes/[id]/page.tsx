@@ -2,6 +2,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_FLOW, type OrderWithItems } from '@/types'
 import ProfitTable from '@/components/admin/ProfitTable'
+import ShoppingChecklist from '@/components/admin/ShoppingChecklist'
 import { advanceOrderStatusAction, recalculateOrderAction } from '../actions'
 import { calculateOrderProfit } from '@/lib/profit'
 
@@ -98,7 +99,9 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <ShoppingChecklist items={order.order_items} orderId={order.id} />
+
         <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
           <h2 className="font-bold text-white mb-4">Detalle de ganancia</h2>
           <ProfitTable items={order.order_items} exchangeRate={order.exchange_rate_snapshot} />

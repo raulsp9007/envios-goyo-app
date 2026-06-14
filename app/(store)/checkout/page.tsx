@@ -3,6 +3,7 @@ import CheckoutForm from '@/components/store/CheckoutForm'
 import type { Province, ShippingConfig } from '@/types'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 30
 
 export default async function CheckoutPage() {
   const supabase = createServiceClient()

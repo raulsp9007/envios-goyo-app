@@ -33,11 +33,14 @@ function itemsHtml(items: ItemRow[]) {
 }
 
 export async function sendNewOrderEmail(order: OrderRow, items: ItemRow[]) {
-  if (!process.env.RESEND_API_KEY) return
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('[email] RESEND_API_KEY no configurado — emails desactivados')
+    return
+  }
 
   const trackingUrl = `${SITE_URL}/orden/${order.id}`
 
-  await Promise.allSettled([
+  const results = await Promise.allSettled([
     resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
@@ -68,6 +71,16 @@ export async function sendNewOrderEmail(order: OrderRow, items: ItemRow[]) {
       `,
     }),
   ])
+
+  results.forEach((r, i) => {
+    if (r.status === 'rejected') {
+      console.error(`[email] Error enviando email ${i === 0 ? 'admin' : 'cliente'}:`, r.reason)
+    } else if (r.value.error) {
+      console.error(`[email] Resend rechazó email ${i === 0 ? 'admin' : 'cliente'}:`, r.value.error)
+    } else {
+      console.log(`[email] Email ${i === 0 ? 'admin' : 'cliente'} enviado OK — id:`, r.value.data?.id)
+    }
+  })
 }
 
 export async function sendStatusChangeEmail(
