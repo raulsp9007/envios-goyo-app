@@ -48,6 +48,7 @@ export default function ProductCard({ product }: { product: Product }) {
               product_id: product.id,
               name: product.name,
               price_usd: effectivePrice,
+              ...(hasDiscount ? { price_usd_original: product.price_usd } : {}),
             })}
             className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-3 py-1.5 rounded-lg text-sm transition"
           >

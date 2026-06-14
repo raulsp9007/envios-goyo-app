@@ -87,21 +87,43 @@ export default function CartDrawer() {
         </div>
 
         {/* Footer */}
-        {items.length > 0 && (
-          <div className="p-4 border-t border-slate-700 space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-slate-300 font-medium">Total</span>
-              <span className="text-orange-400 font-black text-xl">${total.toFixed(2)} USD</span>
+        {items.length > 0 && (() => {
+          const savings = items.reduce((s, item) => {
+            if (item.price_usd_original && item.price_usd_original > item.price_usd) {
+              return s + (item.price_usd_original - item.price_usd) * item.quantity
+            }
+            return s
+          }, 0)
+          return (
+            <div className="p-4 border-t border-slate-700 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-400">Subtotal</span>
+                <span className="text-white">${total.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-400">Envío</span>
+                <span className="text-slate-500 text-xs italic">Se calcula al pagar</span>
+              </div>
+              {savings > 0 && (
+                <div className="flex justify-between text-sm bg-green-500/10 border border-green-500/20 rounded-lg px-3 py-2">
+                  <span className="text-green-400 font-medium">🎉 Ahorro total</span>
+                  <span className="text-green-400 font-bold">-${savings.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center pt-1 border-t border-slate-700">
+                <span className="text-slate-300 font-medium">Total productos</span>
+                <span className="text-orange-400 font-black text-xl">${total.toFixed(2)} USD</span>
+              </div>
+              <a
+                href="/checkout"
+                onClick={closeCart}
+                className="block w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-center transition"
+              >
+                Ir al checkout →
+              </a>
             </div>
-            <a
-              href="/checkout"
-              onClick={closeCart}
-              className="block w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-center transition"
-            >
-              Ir al checkout →
-            </a>
-          </div>
-        )}
+          )
+        })()}
       </div>
     </>
   )

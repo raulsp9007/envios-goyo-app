@@ -1,6 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { toggleProductAction } from './actions'
 import Link from 'next/link'
+import DeleteProductButton from './DeleteProductButton'
 import type { ProductWithCost } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -43,7 +44,8 @@ export default async function AdminProductsPage() {
               <th className="text-right p-3">Precio USD</th>
               <th className="text-right p-3">P. rebajado</th>
               <th className="text-right p-3">Costo CUP</th>
-              <th className="text-right p-3">Ganancia est. %</th>
+              <th className="text-right p-3">Ganancia CUP</th>
+              <th className="text-right p-3">Margen %</th>
               <th className="text-center p-3">Activo</th>
               <th className="p-3"></th>
             </tr>
@@ -51,9 +53,11 @@ export default async function AdminProductsPage() {
           <tbody>
             {products.map(p => {
               const revenueCup = p.price_usd * rate
+              const profitCup = Math.round(revenueCup - p.cost_cup)
               const profitPct = revenueCup > 0
                 ? Math.round(((revenueCup - p.cost_cup) / revenueCup) * 100)
                 : 0
+              const isProfit = profitCup > 0
               return (
                 <tr key={p.id} className="border-b border-slate-700 last:border-0">
                   <td className="p-3 text-white">{p.name}</td>
@@ -68,7 +72,12 @@ export default async function AdminProductsPage() {
                   </td>
                   <td className="p-3 text-right text-slate-300">{p.cost_cup.toFixed(0)} CUP</td>
                   <td className="p-3 text-right">
-                    <span className={profitPct > 0 ? 'text-green-400' : 'text-red-400'}>
+                    <span className={isProfit ? 'text-green-400' : 'text-red-400'}>
+                      {profitCup.toLocaleString()} CUP
+                    </span>
+                  </td>
+                  <td className="p-3 text-right">
+                    <span className={isProfit ? 'text-green-400' : 'text-red-400'}>
                       {profitPct}%
                     </span>
                   </td>
@@ -87,9 +96,12 @@ export default async function AdminProductsPage() {
                     </form>
                   </td>
                   <td className="p-3">
-                    <Link href={`/admin/productos/${p.id}/editar`} className="text-xs text-orange-400 hover:underline">
-                      Editar
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <Link href={`/admin/productos/${p.id}/editar`} className="text-xs text-orange-400 hover:underline">
+                        Editar
+                      </Link>
+                      <DeleteProductButton id={p.id} name={p.name} />
+                    </div>
                   </td>
                 </tr>
               )

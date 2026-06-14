@@ -41,6 +41,7 @@ export interface CartItem {
   product_id: string
   name: string
   price_usd: number
+  price_usd_original?: number
   quantity: number
 }
 

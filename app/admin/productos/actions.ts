@@ -83,6 +83,18 @@ export async function updateProductAction(id: string, formData: FormData) {
   redirect('/admin/productos')
 }
 
+export async function deleteProductAction(id: string) {
+  const auth = createAuthClient()
+  const { data: { user } } = await auth.auth.getUser()
+  if (!user) redirect('/admin/login')
+
+  const supabase = createServiceClient()
+  // Desvincular order_items antes de borrar para no violar FK
+  await supabase.from('order_items').update({ product_id: null }).eq('product_id', id)
+  await supabase.from('products').delete().eq('id', id)
+  revalidatePath('/admin/productos')
+}
+
 export async function toggleProductAction(id: string, active: boolean) {
   const auth = createAuthClient()
   const { data: { user } } = await auth.auth.getUser()
