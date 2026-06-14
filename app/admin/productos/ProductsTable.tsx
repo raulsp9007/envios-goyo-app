@@ -56,7 +56,10 @@ export default function ProductsTable({
               </tr>
             ) : (
               filtered.map(p => {
-                const revenueCup = p.price_usd * rate
+                const effectivePrice = (p.price_usd_sale != null && p.price_usd_sale < p.price_usd)
+                  ? p.price_usd_sale
+                  : p.price_usd
+                const revenueCup = effectivePrice * rate
                 const profitCup = Math.round(revenueCup - p.cost_cup)
                 const profitPct = revenueCup > 0
                   ? Math.round(((revenueCup - p.cost_cup) / revenueCup) * 100)

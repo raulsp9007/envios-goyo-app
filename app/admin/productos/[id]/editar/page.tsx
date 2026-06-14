@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { updateProductAction } from '../../actions'
 import { SalePriceField } from '../../SalePriceField'
+import { ProfitPreview } from '../../ProfitPreview'
 import type { ProductWithCost } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -18,10 +19,12 @@ export default async function EditProductPage({
   const { error } = await searchParams
 
   const supabase = createServiceClient()
-  const [{ data: product }, { data: categories }] = await Promise.all([
+  const [{ data: product }, { data: categories }, { data: rateRow }] = await Promise.all([
     supabase.from('products').select('*').eq('id', id).single(),
     supabase.from('categories').select('name').order('position'),
+    supabase.from('exchange_rate').select('rate').eq('id', 1).single(),
   ])
+  const rate = rateRow?.rate ?? 600
 
   if (!product) notFound()
 
@@ -55,18 +58,7 @@ export default async function EditProductPage({
             ))}
           </select>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm text-slate-300 mb-1">Precio venta (USD) *</label>
-            <input name="price_usd" type="number" step="0.01" min="0" required defaultValue={p.price_usd}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500" />
-          </div>
-          <div>
-            <label className="block text-sm text-slate-300 mb-1">Costo (CUP) *</label>
-            <input name="cost_cup" type="number" step="0.01" min="0" required defaultValue={p.cost_cup}
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500" />
-          </div>
-        </div>
+        <ProfitPreview initialPriceUsd={p.price_usd} initialCostCup={p.cost_cup} rate={rate} />
         <div>
           <label className="block text-sm text-slate-300 mb-1">Precio rebajado</label>
           <SalePriceField priceUsd={p.price_usd} currentSalePrice={p.price_usd_sale} />

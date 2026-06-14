@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createProductAction } from '../actions'
 import { createServiceClient } from '@/lib/supabase/server'
 import { SalePriceField } from '../SalePriceField'
+import { ProfitPreview } from '../ProfitPreview'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,10 +13,11 @@ export default async function NewProductPage({
 }) {
   const params = await searchParams
   const supabase = createServiceClient()
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('name, emoji')
-    .order('position')
+  const [{ data: categories }, { data: rateRow }] = await Promise.all([
+    supabase.from('categories').select('name, emoji').order('position'),
+    supabase.from('exchange_rate').select('rate').eq('id', 1).single(),
+  ])
+  const rate = rateRow?.rate ?? 600
 
   return (
     <div className="max-w-lg">
@@ -48,18 +50,7 @@ export default async function NewProductPage({
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm text-slate-300 mb-1">Precio venta (USD) *</label>
-            <input name="price_usd" type="number" step="0.01" min="0" required
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500" />
-          </div>
-          <div>
-            <label className="block text-sm text-slate-300 mb-1">Costo (CUP) *</label>
-            <input name="cost_cup" type="number" step="0.01" min="0" required
-              className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500" />
-          </div>
-        </div>
+        <ProfitPreview initialPriceUsd={0} initialCostCup={0} rate={rate} />
 
         <div>
           <label className="block text-sm text-slate-300 mb-1">Precio rebajado</label>
