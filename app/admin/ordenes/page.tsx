@@ -44,7 +44,9 @@ export default async function AdminOrdersPage({
 
       {process.env.NODE_ENV !== 'production' ? null : (
         <p className="text-xs text-slate-500 mb-2">
-          DB devolvió {orders?.length ?? 0} órdenes {ordersError ? `— ERROR: ${ordersError.message}` : ''}
+          DB devolvió {orders?.length ?? 0} órdenes
+          {ordersError ? ` — ERROR: ${ordersError.message}` : ''}
+          {' '}· Supabase: {process.env.NEXT_PUBLIC_SUPABASE_URL?.slice(8, 28)}
         </p>
       )}
 
