@@ -78,7 +78,7 @@ export default async function AdminOrdersPage({
                     <span className="text-xs bg-slate-700 px-2 py-1 rounded-full">
                       {ORDER_STATUS_LABELS[order.status as OrderStatus]}
                     </span>
-                    {order.status === 'pending_payment' && (order as any).payment_proof_url && (
+                    {order.status === 'pending_payment' && (order as { payment_proof_url?: string | null }).payment_proof_url && (
                       <span className="text-xs bg-amber-900 text-amber-300 px-2 py-1 rounded-full">
                         comprobante
                       </span>
