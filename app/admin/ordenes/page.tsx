@@ -22,7 +22,7 @@ export default async function AdminOrdersPage({
 
   let query = supabase
     .from('orders')
-    .select('id, order_number, customer_name, customer_email, total_usd, status, created_at')
+    .select('id, order_number, customer_name, customer_email, total_usd, status, created_at, payment_proof_url')
     .order('created_at', { ascending: false })
 
   if (searchParams.status) {
@@ -74,9 +74,16 @@ export default async function AdminOrdersPage({
                 </td>
                 <td className="p-3 text-right text-orange-400">${order.total_usd.toFixed(2)}</td>
                 <td className="p-3">
-                  <span className="text-xs bg-slate-700 px-2 py-1 rounded-full">
-                    {ORDER_STATUS_LABELS[order.status as OrderStatus]}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs bg-slate-700 px-2 py-1 rounded-full">
+                      {ORDER_STATUS_LABELS[order.status as OrderStatus]}
+                    </span>
+                    {order.status === 'pending_payment' && (order as any).payment_proof_url && (
+                      <span className="text-xs bg-amber-900 text-amber-300 px-2 py-1 rounded-full">
+                        comprobante
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="p-3">
                   <Link href={`/admin/ordenes/${order.id}`} className="text-orange-500 hover:underline text-xs">
