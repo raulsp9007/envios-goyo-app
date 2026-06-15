@@ -67,3 +67,28 @@ export async function recalculateOrderAction(orderId: string, formData: FormData
 
   revalidatePath(`/admin/ordenes/${orderId}`)
 }
+
+export async function approveProofAction(orderId: string) {
+  const auth = createAuthClient()
+  const { data: { user } } = await auth.auth.getUser()
+  if (!user) redirect('/admin/login')
+
+  const supabase = createServiceClient()
+
+  const { data: order } = await supabase
+    .from('orders')
+    .update({ status: 'waiting' })
+    .eq('id', orderId)
+    .select('order_number, customer_email, customer_name')
+    .single()
+
+  if (order) {
+    try {
+      await sendStatusChangeEmail(order.customer_email, order.customer_name, order.order_number, 'waiting')
+    } catch (e) {
+      console.error('[proof approve] Email error:', e)
+    }
+  }
+
+  revalidatePath(`/admin/ordenes/${orderId}`)
+}

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_FLOW, type OrderWithItems } from '@/types'
 import ProfitTable from '@/components/admin/ProfitTable'
 import ShoppingChecklist from '@/components/admin/ShoppingChecklist'
-import { advanceOrderStatusAction, recalculateOrderAction } from '../actions'
+import { advanceOrderStatusAction, recalculateOrderAction, approveProofAction } from '../actions'
 import { calculateOrderProfit } from '@/lib/profit'
 
 export const dynamic = 'force-dynamic'
@@ -153,6 +153,32 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
           </form>
         </div>
       </div>
+
+      {order.payment_proof_url && (
+        <div className="mt-4 bg-slate-800 border border-slate-700 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-bold text-white">Comprobante de pago</h2>
+            {order.status === 'pending_payment' && (
+              <form action={approveProofAction.bind(null, order.id)}>
+                <button
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-lg text-sm"
+                >
+                  ✅ Aprobar comprobante
+                </button>
+              </form>
+            )}
+          </div>
+          <a href={order.payment_proof_url} target="_blank" rel="noreferrer">
+            <img
+              src={order.payment_proof_url}
+              alt="Comprobante de pago"
+              className="max-h-96 rounded-lg border border-slate-600 object-contain"
+            />
+          </a>
+          <p className="text-xs text-slate-500 mt-2">Clic en la imagen para ver en tamaño completo</p>
+        </div>
+      )}
     </div>
   )
 }
