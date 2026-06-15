@@ -38,6 +38,23 @@ export default async function ConfigPage() {
             className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
           />
         </div>
+        <div className="flex items-center justify-between bg-slate-800 border border-slate-700 rounded-xl px-4 py-3">
+          <div>
+            <p className="text-sm text-slate-200 font-medium">Aprobar comprobantes automáticamente</p>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Si está activo, cuando el cliente sube su comprobante la orden pasa a <strong>En espera</strong> sin revisión manual.
+            </p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
+            <input
+              type="checkbox"
+              name="auto_approve_proof"
+              defaultChecked={settings.auto_approve_proof === 'true'}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+          </label>
+        </div>
         <button
           type="submit"
           className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-2 rounded-lg"

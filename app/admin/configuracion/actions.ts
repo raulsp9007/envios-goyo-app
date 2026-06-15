@@ -10,17 +10,21 @@ export async function updateSettingsAction(formData: FormData) {
   if (!user) redirect('/admin/login')
 
   const supabase = createServiceClient()
-  const keys = ['payment_instructions', 'business_name', 'business_tagline']
 
-  await Promise.all(
-    keys.map(key => {
+  const textKeys = ['payment_instructions', 'business_name', 'business_tagline']
+  const boolKeys = ['auto_approve_proof']
+
+  await Promise.all([
+    ...textKeys.map(key => {
       const value = formData.get(key) as string
-      if (!value) return Promise.resolve()
-      return supabase
-        .from('settings')
-        .upsert({ key, value }, { onConflict: 'key' })
-    })
-  )
+      if (value === null) return Promise.resolve()
+      return supabase.from('settings').upsert({ key, value }, { onConflict: 'key' })
+    }),
+    ...boolKeys.map(key => {
+      const value = formData.get(key) === 'on' ? 'true' : 'false'
+      return supabase.from('settings').upsert({ key, value }, { onConflict: 'key' })
+    }),
+  ])
 
   revalidatePath('/admin/configuracion')
 }
