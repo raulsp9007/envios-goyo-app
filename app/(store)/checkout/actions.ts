@@ -2,6 +2,7 @@
 
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendNewOrderEmail, sendWhatsAppNotification } from '@/lib/notifications'
+import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
@@ -119,6 +120,8 @@ export async function createOrderAction(formData: FormData) {
   })
 
   await supabase.from('order_items').insert(orderItems)
+
+  revalidatePath('/admin/ordenes')
 
   // Fire-and-forget — don't block redirect on notifications
   Promise.all([

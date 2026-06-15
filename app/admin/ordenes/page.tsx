@@ -29,13 +29,11 @@ export default async function AdminOrdersPage({
     query = query.eq('status', searchParams.status)
   }
 
-  const { data: orders, error: ordersError } = await query
-  const { count } = await supabase.from('orders').select('*', { count: 'exact', head: true })
+  const { data: orders } = await query
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Órdenes</h1>
-      <p className="text-xs text-slate-500 mb-2">DB total: {count} · Query devolvió: {orders?.length ?? 0}{ordersError ? ` · Error: ${ordersError.message}` : ''}</p>
 
 
       <div className="flex gap-2 flex-wrap mb-6">
