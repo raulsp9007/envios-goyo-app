@@ -61,6 +61,7 @@ export interface Order {
   shipping_cost_usd: number
   exchange_rate_snapshot: number
   payment_instructions: string
+  payment_proof_url: string | null
   created_at: string
 }
 
