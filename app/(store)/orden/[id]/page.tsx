@@ -1,7 +1,8 @@
 import { createServiceClient } from '@/lib/supabase/server'
-import StatusProgress from '@/components/store/StatusProgress'
 import { notFound } from 'next/navigation'
 import type { OrderWithItems } from '@/types'
+import OrderTracker from '@/components/store/OrderTracker'
+import ProofUpload from '@/components/store/ProofUpload'
 
 export default async function OrderPage({
   params,
@@ -16,7 +17,8 @@ export default async function OrderPage({
     .from('orders')
     .select(`
       id, order_number, customer_name, customer_email, status,
-      total_usd, exchange_rate_snapshot, payment_instructions, created_at,
+      total_usd, exchange_rate_snapshot, payment_instructions,
+      payment_proof_url, created_at,
       order_items (
         id, product_name, quantity, price_usd
       )
@@ -27,6 +29,11 @@ export default async function OrderPage({
   if (!order) notFound()
 
   const typedOrder = order as unknown as OrderWithItems
+
+  const showUpload =
+    typedOrder.status === 'pending_payment' && !typedOrder.payment_proof_url
+  const proofPending =
+    typedOrder.status === 'pending_payment' && !!typedOrder.payment_proof_url
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -46,7 +53,10 @@ export default async function OrderPage({
       </div>
 
       <div className="mb-6">
-        <StatusProgress status={typedOrder.status} />
+        <OrderTracker
+          orderId={typedOrder.id}
+          initialStatus={typedOrder.status}
+        />
       </div>
 
       <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-4">
@@ -66,9 +76,22 @@ export default async function OrderPage({
       </div>
 
       {typedOrder.payment_instructions && (
-        <div className="bg-slate-800 border border-orange-900 rounded-xl p-4">
+        <div className="bg-slate-800 border border-orange-900 rounded-xl p-4 mb-4">
           <h2 className="font-bold text-orange-400 mb-2">Instrucciones de pago</h2>
           <p className="text-slate-300 text-sm whitespace-pre-wrap">{typedOrder.payment_instructions}</p>
+        </div>
+      )}
+
+      {showUpload && (
+        <ProofUpload orderId={typedOrder.id} />
+      )}
+
+      {proofPending && (
+        <div className="bg-blue-900/40 border border-blue-700 text-blue-300 rounded-xl p-4">
+          <p className="font-medium">🕐 Comprobante recibido</p>
+          <p className="text-sm mt-1 text-blue-400">
+            Tu comprobante está siendo revisado por el equipo. El estado se actualizará automáticamente.
+          </p>
         </div>
       )}
     </div>
